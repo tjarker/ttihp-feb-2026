@@ -9,12 +9,9 @@ You can also include images in this folder and reference them in the markdown. E
 
 ## How it works
 
-This is how it works
+This will contain a detailed description of how it works.
 
 ## How to test
 
-this is how to test it
+This will contain instructions on how to test it.
 
-## External hardware
-
-List external hardware used in your project (e.g. PMOD, LED display, etc), if any
