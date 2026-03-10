@@ -15,5 +15,15 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Setup sbt
+        uses: sbt/setup-sbt@v1
+      - name: generate Verilog
+        run: sbt run
+
       - name: FPGA bitstream for TT ASIC Sim (ICE40UP5K)
         uses: TinyTapeout/tt-gds-action/fpga/ice40up5k@ttihp26a
