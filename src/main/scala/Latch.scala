@@ -11,7 +11,7 @@ class Latch(w: Int) extends BlackBox(Map(
     val d = Input(UInt(w.W))
     val q = Output(UInt(w.W))
   })
-  addPath("src/latch.sv")
+  //addPath("src/latch.sv")
 }
 
 object Latch {
