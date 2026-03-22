@@ -6,7 +6,7 @@ SIM ?= icarus
 FST ?= -fst # Use more efficient FST format
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = tt_um_async_test.v ChiselTop.v latch.sv
+PROJECT_SOURCES = tt_um_async_test.v ChiselTop.v latch.sv delay.sv c_gates.sv ../sg13g2_stdcell.v
 
 
 ifneq ($(GATES),yes)
@@ -32,6 +32,7 @@ endif
 
 # Allow sharing configuration between design and testbench via `include`:
 COMPILE_ARGS 		+= -I$(SRC_DIR)
+COMPILE_ARGS 		+= -DTEST
 
 # Include the testbench sources:
 VERILOG_SOURCES += $(PWD)/tb.v

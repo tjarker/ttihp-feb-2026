@@ -24,6 +24,7 @@ module tt_um_async_test (
     // Just wrap the Chisel generated Verilog
 
     ChiselTop ChiselTop(.clock(clk),
+      .io_reset_n(rst_n),
       .reset(reset),
       .io_ui_in(ui_in),
       .io_uo_out(uo_out),

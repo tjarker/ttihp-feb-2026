@@ -30,6 +30,11 @@ jobs:
           java-version: 17
       - name: Setup sbt
         uses: sbt/setup-sbt@v1
+      - name: clone Liftoff and run sbt publishLocal
+        run: |
+          git clone https://github.com/tjarker/liftoff.git
+          cd liftoff
+          sbt 'publishLocal; macros/publishLocal'
       - name: generate Verilog
         run: sbt run
 
