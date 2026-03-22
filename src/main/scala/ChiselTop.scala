@@ -53,6 +53,14 @@ class ChiselTop() extends Module {
   io.uio_oe := 0xFF.U // Set all IOs to input mode (0)
 }
 
+class sg13g2_xor2_1 extends BlackBox {
+  val io = IO(new Bundle {
+    val A = Input(Bool())
+    val B = Input(Bool())
+    val X = Output(Bool())
+  })
+}
+
 class Handshake[T <: Data](dt: T) extends Bundle {
   val req = Output(Bool())
   val ack = Input(Bool())
@@ -68,7 +76,12 @@ class MouseTrap[T <: Data](dt: => T) extends Module {
   val busy = Wire(Bool())
   val reqLatch = Latch(io.in.req, busy, io.reset_n)
 
-  busy := Delay(reqLatch ^ io.out.ack, 1)
+
+  val xorGate = Module(new sg13g2_xor2_1)
+  xorGate.io.A := reqLatch
+  xorGate.io.B := io.out.ack
+
+  busy := Delay(xorGate.io.X, 1)
 
   val dataLatch = Latch(io.in.data, busy, io.reset_n)
 
