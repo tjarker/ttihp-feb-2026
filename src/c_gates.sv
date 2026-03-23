@@ -12,14 +12,16 @@ module c_gate_ao (
   assign a_or_b = a | b;
   assign a_and_b = a & b;
 
-  logic feedback;
+  logic out;
+  logic delayed_out;
   `ifdef TEST
-  assign #1 feedback = c;
+  assign #1 delayed_out = out;
   `else
-  assign feedback = c;
+  assign delayed_out = out;
   `endif
+  assign c = delayed_out;
 
-  sg13g2_a21o_1 AO (.A1(a_or_b && rst_n), .A2(feedback), .B1(a_and_b && rst_n), .X(c));
+  sg13g2_a21o_1 AO (.A1(a_or_b && rst_n), .A2(delayed_out), .B1(a_and_b && rst_n), .X(out));
 endmodule
 
 
@@ -33,14 +35,16 @@ module c_gate_mux (
 );
 
 logic a_xor_b;
+logic out;
 assign a_xor_b = a ^ b;
-logic feedback;
+logic delayed_out;
 `ifdef TEST
-assign #1 feedback = c;
+assign #1 delayed_out = out;
 `else
-assign feedback = c;
+assign delayed_out = out;
 `endif
-sg13g2_mux2_1 MUX (.A0(a && rst_n), .A1(feedback), .S(a_xor_b && rst_n), .X(c));
+assign c = delayed_out;
+sg13g2_mux2_1 MUX (.A0(a && rst_n), .A1(delayed_out), .S(a_xor_b && rst_n), .X(out));
 
 endmodule
 
@@ -64,7 +68,7 @@ logic R,S;
 assign R = a_nor_b || ~rst_n;
 assign S = a_and_b && rst_n;
 
-assign c = q;
+
 logic feedback_q, feedback_q_bar;
 `ifdef TEST
 assign #1 feedback_q = q;
@@ -73,6 +77,7 @@ assign #1 feedback_q_bar = q_bar;
 assign feedback_q = q;
 assign feedback_q_bar = q_bar;
 `endif
+assign c = feedback_q;
 
 sg13g2_nor2_1 NOR1 (.A(R), .B(feedback_q_bar), .Y(q));
 sg13g2_nor2_1 NOR2 (.A(S), .B(feedback_q), .Y(q_bar));

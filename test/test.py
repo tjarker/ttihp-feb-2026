@@ -27,12 +27,21 @@ async def test_project(dut):
 
     # Reset
     dut._log.info("Reset")
-    # dut.ena.value = 1
-    # dut.ui_in.value = 0
-    # dut.uio_in.value = 0
-    # dut.rst_n.value = 0
-    # await ClockCycles(dut.clk, 10)
-    # dut.rst_n.value = 1
+    dut.ena.value = 1
+    dut.ui_in.value = 0
+    dut.uio_in.value = 0
+    dut.rst_n.value = 0
+    #await ClockCycles(dut.clk, 1)
+    await Timer(1, unit="ns")
+    dut.rst_n.value = 1
+
+    await Timer(100, unit="ns")
+
+    dut._log.info("Test reset behavior")
+
+    dut.ui_in.value = 1 << 6
+
+    await Timer(1000, unit="ns")
 
     # await arbtx(dut, 1, 0)
     # await arbtx(dut, 0, 0)

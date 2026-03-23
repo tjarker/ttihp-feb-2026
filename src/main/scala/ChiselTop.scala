@@ -21,6 +21,7 @@ class ChiselTop() extends Module {
   val reqInFifo = io.ui_in(3)
   val dataInFifo = io.ui_in(4)
   val ackInFifo = io.ui_in(5)
+  val ringEn = io.ui_in(6)
 
   val cGateAO = CGate(new c_gate_ao, a, b, io.reset_n)
   val cGateMux = CGate(new c_gate_mux, a, b, io.reset_n)
@@ -39,8 +40,12 @@ class ChiselTop() extends Module {
   mouseTrapFifo.io.in.data := dataInFifo
   mouseTrapFifo.io.out.ack := ackInFifo
 
+  val aoRing = CGate.ring(new c_gate_ao)(128, ringEn, io.reset_n)
+  val muxRing = CGate.ring(new c_gate_mux)(128, ringEn, io.reset_n)
+  val latchRing = CGate.ring(new c_gate_sr_nor_latch)(128, ringEn, io.reset_n)
   
   io.uo_out := Cat(
+    0.U(2.W), // 7-6: unused
     mouseTrapFifo.io.in.ack, // 6
     mouseTrapFifo.io.out.req, // 5
     mouseTrapFifo.io.out.data, // 4
@@ -49,8 +54,13 @@ class ChiselTop() extends Module {
     cGateMux, // 1
     cGateAO, // 0
   )
-  io.uio_out := 0.U
-  io.uio_oe := 0xFF.U // Set all IOs to input mode (0)
+  io.uio_out := Cat(
+    0.U(5.W), // 7-3: unused
+    latchRing, // 2
+    muxRing, // 1
+    aoRing // 0
+  ) // 6-2: rings, 1-0: unused
+  io.uio_oe := 0x00.U // Set all IOs to output
 }
 
 class sg13g2_xor2_1 extends BlackBox {
@@ -144,6 +154,29 @@ object CGate {
     val gate = Module(fac)
     gate.io.rst_n := rst_n
     gate.connect(a, b)
+  }
+
+
+  def ring(fac: => CGate)(n: Int, en: Bool, rst_n: Bool): Bool = {
+    val gates = Seq.fill(n)(Module(fac))
+    for (i <- 0 until n) {
+      val previousOut = gates((i + n - 1) % n).io.c
+      gates(i).io.rst_n := rst_n
+      if (i == 0) {
+        // en prev
+        // 0  0 -> 1
+        // 0  1 -> 1
+        // 1  0 -> 1
+        // 1  1 -> 0
+        val mux = Mux(en, !previousOut, true.B)
+        gates(i).io.a := mux
+        gates(i).io.b := mux
+      } else {
+        gates(i).io.a := previousOut
+        gates(i).io.b := previousOut
+      }
+    }
+    gates.last.io.c
   }
 }
 abstract class CGate(name: String) extends BlackBox {
